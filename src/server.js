@@ -1,6 +1,7 @@
 import express from 'express';
+import fs from 'fs';
 import { Server } from 'socket.io';
-import { createServer } from 'http';
+import { createServer } from 'https';
 import { Quiz } from "./game/Quiz.class.js";
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -10,8 +11,17 @@ import config from '../config.json' with { type: 'json' };
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+var options = null;
+if (config.SSL) {
+    options = {
+        key: fs.readFileSync('./privkey.pem', 'utf8'),
+        cert: fs.readFileSync('./fullchain.pem', 'utf8'),
+        ca: fs.readFileSync('./chain.pem', 'utf8')
+    };
+}
+
 const app = express();
-const server = createServer(app);
+const server = createServer(options, app);
 const io = new Server(server);
 
 // Stockage des différentes instances de quiz
